@@ -9,7 +9,7 @@
 // operator<< tiene que ser una función libre (no un método de la
 // clase): en `std::cout << v1`, el operando izquierdo es std::cout, no
 // un Vector2D. Recibe el stream por referencia (std::ostream&, con &)
-// porque un stream no se puede copiar, y también lo devuelve por
+// porque un s semtream no se puede copiar, y también lo devuelve por
 // referencia para poder encadenar varios `<<` seguidos.
 //
 // Salida esperada:
@@ -35,13 +35,15 @@ public:
     double getY() { return y; }
 
     Vector2D operator+(Vector2D otro) {
+        
         // TODO: retorna un Vector2D nuevo con x + otro.getX() como
         // primera coordenada, y y + otro.getY() como segunda.
-        return Vector2D(0.0, 0.0);
+        return Vector2D(x + otro.getX(), y + otro.getY());
     }
 };
 
 std::ostream& operator<<(std::ostream& os, Vector2D v) {
+    os << "(" << v.getX() << ", " << v.getY() << ")";
     // TODO: escribe en os algo como "(x, y)", usando v.getX() y
     // v.getY(), y despues retorna os.
     return os;

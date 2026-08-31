@@ -27,13 +27,15 @@ public:
     double getImaginario() { return imaginario; }
 
     NumeroComplejo operator+(NumeroComplejo otro) {
+
         // TODO: retorna un NumeroComplejo nuevo con la suma de las
         // partes reales y la suma de las partes imaginarias.
-        return NumeroComplejo(0.0, 0.0);
+        return NumeroComplejo(real + otro.getReal(), imaginario + otro.getImaginario()) ;
     }
 };
 
 std::ostream& operator<<(std::ostream& os, NumeroComplejo c) {
+    os << c.getReal() << " + " << c.getImaginario() << "i";
     // TODO: escribe en os algo como "real + imaginarioi" (por ejemplo,
     // "3 + 2i"), usando c.getReal() y c.getImaginario(), y despues
     // retorna os.
