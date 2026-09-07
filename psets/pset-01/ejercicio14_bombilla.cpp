@@ -25,3 +25,34 @@
 //
 // Compilar:  g++ -std=c++20 -Wall -Wextra -g ejercicio14_bombilla.cpp -o bin/ejercicio14
 // Ejecutar:  ./bin/ejercicio14
+
+using namespace std;
+#include <iostream>
+
+class Bombilla {
+private:
+    double vidaUtilHoras;
+public:
+    Bombilla(double horasIniciales) {
+        if (horasIniciales <= 0) {
+            vidaUtilHoras = 1000.0;
+            cout << "Vida util invalida, se asigna 1000 horas por defecto" << endl;
+        } else {
+            vidaUtilHoras = horasIniciales;
+        }
+    }           
+
+    double getVidaUtilHoras() const {
+        return vidaUtilHoras;
+    }
+};  
+
+int main() {
+    Bombilla bombilla1(5000.0);
+    cout << "Vida util: " << bombilla1.getVidaUtilHoras() << endl;
+
+    Bombilla bombilla2(-200.0);
+    cout << "Vida util: " << bombilla2.getVidaUtilHoras() << endl;
+
+    return 0;
+}   
