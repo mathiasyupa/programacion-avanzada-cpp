@@ -77,8 +77,8 @@ int main() {
 
     // TODO: antes de descomentar, predice: ¿que error da el compilador
     // y sobre que palabra exactamente?
-    // mfp.setNumeroSerie(1234);
-    // mfp.describir();
+    mfp.setNumeroSerie(1234);
+    mfp.describir();
 
     return 0;
 }

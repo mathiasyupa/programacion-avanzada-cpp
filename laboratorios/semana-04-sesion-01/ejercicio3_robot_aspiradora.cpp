@@ -34,7 +34,32 @@ class DispositivoElectronico {
 // - void aspirar(): imprime "Aspirando el polvo del piso"
 // - void moverse(int distanciaCm): imprime "Moviendose <distanciaCm> cm hacia adelante"
 class RobotAspiradora {
-    // TODO
+    private:
+        DispositivoElectronico dispositivo;
+    public:
+        void setNumeroSerie(int nuevoNumero) {
+            dispositivo.setNumeroSerie(nuevoNumero);
+        }
+
+        void encender() {
+            dispositivo.encender();
+        }
+
+        void apagar() {
+            dispositivo.apagar();
+        }
+
+        void describir() {
+            dispositivo.describir();
+        }
+
+        void aspirar() {
+            std::cout << "Aspirando el polvo del piso" << std::endl;
+        }
+
+        void moverse(int distanciaCm) {
+            std::cout << "Moviendose " << distanciaCm << " cm hacia adelante" << std::endl;
+        }
 };
 
 int main() {
