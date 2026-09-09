@@ -31,6 +31,26 @@ class Bateria {
 // void descargar(int porcentaje): reduce el nivel de carga de la bateria
 //   en ese porcentaje.
 class Dron {
+    private:
+        Bateria bateria;
+    public:
+        bool despegar() {
+            if (!bateria.estaCargada()) {
+                std::cout << "Bateria muy baja, no despega" << std::endl;
+                return false;
+            } else {
+                std::cout << "Dron despegando con " << bateria.getNivelCargaPorc() << "% de bateria" << std::endl;
+                return true;
+            }
+        }   
+    
+    void descargar(int porcentaje) {
+            int nuevoNivel = bateria.getNivelCargaPorc() - porcentaje;
+            if (nuevoNivel < 0) {
+                nuevoNivel = 0;
+            }
+            bateria.setNivelCargaPorc(nuevoNivel);
+        }
     // TODO
 };
 
