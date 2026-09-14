@@ -19,9 +19,10 @@ class RegistroTemperaturas {
             return lecturas[indice];
         }
 
-        // TODO: agrega el destructor. Debe liberar "lecturas" con delete[]
-        // e imprimir "Memoria liberada", para atar la vida de ese recurso
-        // a la vida del objeto (RAII).
+        ~RegistroTemperaturas() {
+            delete[] lecturas;
+            std::cout << "Memoria liberada" << std::endl;
+        }
 };
 
 void registrarDia(int capacidad) {
