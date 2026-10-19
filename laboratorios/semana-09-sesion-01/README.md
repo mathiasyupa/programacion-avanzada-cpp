@@ -12,11 +12,15 @@ Diseñar una interfaz común mediante clases abstractas y funciones virtuales pu
 
 Según el artículo, ¿qué dice el principio de inversión de dependencias sobre de quién debe depender una clase de alto nivel? ¿Qué problema describe el principio de segregación de interfaces?
 
-_(tu respuesta)_
+Las clases de alto nivel deben depender de abstracciones, no de clases
+concretas de bajo nivel. La segregacion de interfaces evita obligar a una
+clase a implementar metodos que no necesita ni puede cumplir de verdad.
 
 La sesión pasada, `Figura::area()` devolvía 0 solo porque algo tenía que devolver. ¿Tiene sentido crear un objeto que sea solo una `Figura`? Si no, ¿qué debería hacer el compilador cuando alguien lo intenta?
 
-_(tu respuesta)_
+No tiene sentido crear una Figura generica porque no tiene una forma ni un
+area concreta. El compilador debe impedir crearla convirtiendola en una
+clase abstracta.
 
 ## Ejercicio 1: Figura abstracta
 
@@ -24,15 +28,27 @@ Archivo: [`ejercicio1_figura_abstracta.cpp`](./ejercicio1_figura_abstracta.cpp).
 
 **Respuesta 1, antes de ver la solución:** después de convertir `area()` e `imprimirNombre()` en virtuales puras, ¿qué pasa con la línea `Figura generica;` si le quitas el comentario?
 
-_(tu respuesta)_
+El compilador rechaza la declaracion porque Figura es una clase abstracta:
+tiene las funciones virtuales puras area() e imprimirNombre().
 
 **Respuesta 2:** `Triangulo` no implementa `area()`. ¿En qué línea aparece el error, y qué le falta a `Triangulo` para que se pueda crear?
 
-_(tu respuesta)_
+El error aparece al intentar crear el Triangulo en la linea con
+make_unique<Triangulo>. Le falta implementar double area() override, con
+base * altura / 2.
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí los dos mensajes de error y la salida final)_
+Al intentar crear Figura generica, el compilador informa que Figura es un
+tipo abstracto. Al intentar crear Triangulo antes de implementar area(),
+informa que Triangulo tambien es abstracto porque Figura::area() sigue sin
+implementarse. La salida final es:
+
+```
+Circulo de area 3.14159
+Rectangulo de area 6
+Triangulo de area 6
+```
 
 ## Durante el ConcepTest
 
@@ -56,7 +72,8 @@ Archivo: [`ejercicio2_estacion_meteorologica.cpp`](./ejercicio2_estacion_meteoro
 
 Antes de dar el ejercicio por terminado, responde: si mañana agregas un `Higrometro` (humedad en %), ¿qué líneas de `EstacionMeteorologica` tienes que cambiar?
 
-_(tu respuesta)_
+No hay que cambiar ninguna linea de EstacionMeteorologica. Solo se crea
+una clase Higrometro que implemente IMedidor y se entrega con agregar().
 
 ## Ejercicio 3: dispositivos de oficina
 
@@ -66,11 +83,14 @@ El archivo compila y corre tal como está, con una sola interfaz `IDispositivoOf
 
 Antes de escribir código, responde: `Multifuncional` va a heredar de tres clases a la vez. En la Semana 4, una herencia así terminó en el problema del diamante. ¿Por qué aquí no aparece?
 
-_(tu respuesta)_
+No aparece el problema del diamante porque IImpresora, IEscaner e IFax son
+interfaces independientes: ninguna hereda de una misma clase base comun.
 
 Al terminar, prueba guardar `&basica` en el arreglo de escáneres. ¿Qué dice el compilador?
 
-_(tu respuesta)_
+El compilador rechaza la asignacion porque ImpresoraBasica no hereda de
+IEscaner; por eso un ImpresoraBasica* no se puede convertir en un
+IEscaner*.
 
 ## Compilar y ejecutar
 
