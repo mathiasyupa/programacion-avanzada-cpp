@@ -12,11 +12,13 @@ Escribir una función o clase genérica con templates que evite duplicar código
 
 Según el artículo, ¿qué hace el compilador cuando usas una plantilla de función con un tipo que todavía no había visto? ¿Ocurre al compilar o al ejecutar?
 
-_(tu respuesta)_
+El compilador genera una version de la funcion para ese tipo cuando se
+necesita. Esto ocurre al compilar, no al ejecutar el programa.
 
 Necesitas `mayor` para `int`, para `double` y para `char`, y escribes tres funciones con el mismo cuerpo. Si mañana encuentras un error en ese cuerpo, ¿cuántas veces lo corriges?
 
-_(tu respuesta)_
+Hay que corregirlo en las tres funciones. Con una plantilla se corrige en
+un solo lugar.
 
 ## Ejercicio 1: mayor y sumarTres
 
@@ -24,15 +26,30 @@ Archivo: [`ejercicio1_mayor_template.cpp`](./ejercicio1_mayor_template.cpp). Tre
 
 **Respuesta 1, antes de ver la solución:** con una plantilla `mayor`, ¿compila `mayor(3, 4.5)`? Si no, ¿qué dice el error y cómo se corrige sin tocar la plantilla?
 
-_(tu respuesta)_
+No compila porque el compilador deduce dos tipos distintos para T: int y
+double. Se puede indicar el tipo con `mayor<double>(3, 4.5)`.
 
 **Respuesta 2:** `sumarTres(v1, v2, v3)` compila con tres `Vector2D`. ¿Compila `mayor(v1, v2)`? ¿Qué parte de la plantilla decide si un tipo sirve o no?
 
-_(tu respuesta)_
+No compila porque Vector2D tiene operator+ pero no tiene operator>. Las
+operaciones usadas en el cuerpo de la plantilla deben estar disponibles
+para el tipo que recibe.
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí la plantilla, los dos mensajes de error y la salida final)_
+La plantilla usa `template <typename T>` y devuelve el mayor comparando
+`a > b`. Los errores fueron `no matching function for call to
+mayor(int, double)` por los tipos distintos y `no match for operator>`
+para Vector2D. La salida final es:
+
+```
+mayor(3, 7) = 7
+mayor(2.5, 1.5) = 2.5
+mayor('a', 'z') = z
+mayor(3, 4.5) = 4.5
+sumarTres(1, 2, 3) = 6
+sumarTres(v1, v2, v3) = (6, 3)
+```
 
 ## Durante el ConcepTest
 
@@ -56,7 +73,9 @@ Escribe las plantillas de función `sumarArreglo(datos, cantidad)` y `contarMayo
 
 Antes de dar el ejercicio por terminado, responde: ¿con qué valor arrancaste la suma? Si arrancas en `T total = 0;`, ¿con qué tipo deja de compilar, y por qué? ¿Qué condición nueva le impone tu versión al arreglo que recibe?
 
-_(tu respuesta)_
+La suma comienza con `datos[0]`. Si se usa `T total = 0`, no compila con
+Vector2D porque no se puede convertir un entero en ese tipo. Al empezar
+con el primer elemento, el arreglo debe tener al menos un elemento.
 
 ## Ejercicio 3: Historial genérico
 
@@ -66,7 +85,9 @@ Escribe la plantilla de clase `Historial<T>` a partir de la especificación del 
 
 Antes de dar el ejercicio por terminado, responde: ¿compilaría `Historial<Vector2D> posiciones(2);`? ¿Qué línea de tu plantilla lo decide?
 
-_(tu respuesta)_
+No con el Vector2D de estos ejercicios: no tiene constructor sin
+parametros. `std::make_unique<T[]>(capacidad)` necesita construir cada
+elemento del arreglo y por eso necesita ese constructor.
 
 ## Compilar y ejecutar
 
@@ -87,4 +108,5 @@ Plantilla de función (`template <typename T>` antes de la función, `T` como ti
 
 `Historial` tiene una capacidad fija y rechaza el valor que no cabe. ¿Qué tendría que hacer para crecer cuando se llena? ¿Qué te dice la lectura sobre quién ya resolvió ese problema en la biblioteca estándar?
 
-_(tu respuesta)_
+Tendria que reservar un arreglo mas grande, pasar los valores existentes y
+liberar el anterior. `std::vector` ya permite crecer de forma automatica.
