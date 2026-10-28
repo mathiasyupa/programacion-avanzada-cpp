@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <iostream>
+#include <numeric>
 #include <vector>
 
 // Salida esperada:
@@ -49,19 +51,42 @@ int main() {
     };
     double umbral = 20.0;
 
-    // TODO: el total recaudado (la suma de getTotal() de todas las
-    // ventas). Imprime "Total recaudado: ".
+    double totalRecaudado = std::accumulate(
+        ventas.begin(), ventas.end(), 0.0, [](double acumulado, Venta venta) {
+            return acumulado + venta.getTotal();
+        }
+    );
+    std::cout << "Total recaudado: " << totalRecaudado << std::endl;
 
-    // TODO: cuantas ventas tienen un total de al menos umbral. Imprime
-    // "Ventas de al menos 20: ".
+    int ventasGrandes = std::count_if(
+        ventas.begin(), ventas.end(), [umbral](Venta venta) {
+            return venta.getTotal() >= umbral;
+        }
+    );
+    std::cout << "Ventas de al menos 20: " << ventasGrandes << std::endl;
 
-    // TODO: busca la primera venta del producto 210 e imprime
-    // "Primera venta de 210: N unidades". Despues busca una venta del
-    // producto 999: si no existe, imprime "No hay ventas de 999". Escribe
-    // la busqueda de modo que el codigo buscado sea una variable, no un
-    // numero escrito dentro de la lambda.
+    int codigoBuscado = 210;
+    auto venta210 = std::find_if(
+        ventas.begin(), ventas.end(), [codigoBuscado](Venta venta) {
+            return venta.getCodigo() == codigoBuscado;
+        }
+    );
+    std::cout << "Primera venta de 210: " << venta210->getCantidad()
+              << " unidades" << std::endl;
 
-    // TODO: ordena ventas de mayor a menor total.
+    codigoBuscado = 999;
+    auto venta999 = std::find_if(
+        ventas.begin(), ventas.end(), [codigoBuscado](Venta venta) {
+            return venta.getCodigo() == codigoBuscado;
+        }
+    );
+    if (venta999 == ventas.end()) {
+        std::cout << "No hay ventas de 999" << std::endl;
+    }
+
+    std::sort(ventas.begin(), ventas.end(), [](Venta a, Venta b) {
+        return a.getTotal() > b.getTotal();
+    });
 
     std::cout << "Ordenadas por total:";
     for (Venta v : ventas) {

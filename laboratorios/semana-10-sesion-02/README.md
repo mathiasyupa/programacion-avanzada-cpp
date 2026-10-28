@@ -12,11 +12,15 @@ Resolver problemas usando algoritmos de la biblioteca STL en lugar de loops manu
 
 Según el artículo, ¿qué reciben como argumento los algoritmos de `<algorithm>`: el contenedor, o otra cosa? ¿Qué devuelve `std::find` cuando no encuentra el valor?
 
-_(tu respuesta)_
+Los algoritmos reciben iteradores que delimitan un rango, no el
+contenedor completo. Si find no encuentra el valor, devuelve el iterador
+end() del rango.
 
 Si necesitas sumar, buscar el máximo y contar valores en un `vector` y en una `list`, ¿cuántas funciones escribirías con lo que sabías la sesión pasada? ¿Qué tendría que recibir una sola función para servir a los dos?
 
-_(tu respuesta)_
+Sin algoritmos se escribirian versiones separadas para cada contenedor y
+operacion. Una funcion comun debe recibir dos iteradores: inicio y fin del
+rango.
 
 ## Ejercicio 1: de loops a algoritmos
 
@@ -24,19 +28,25 @@ Archivo: [`ejercicio1_lecturas_algoritmos.cpp`](./ejercicio1_lecturas_algoritmos
 
 **Respuesta 1, antes de ver la solución:** `std::max_element` no devuelve un `double`. ¿Qué devuelve, y por qué esa es la decisión correcta si el vector pudiera estar vacío?
 
-_(tu respuesta)_
+Devuelve un iterador al mayor elemento. Si el rango esta vacio devuelve
+end(), lo que permite comprobarlo antes de intentar desreferenciar un
+valor que no existe.
 
 **Respuesta 2:** en el paso 5, las mismas llamadas pasan a recibir `lista.begin()` y `lista.end()`. ¿Compilan sin cambios? ¿Qué tiene que saber hacer el iterador de una lista para que `std::count` funcione?
 
-_(tu respuesta)_
+Si, compilan sin cambios. El iterador de list debe poder compararse con
+end(), avanzar con ++ y desreferenciarse para leer cada elemento.
 
 **Respuesta 3:** en el paso 6, `std::accumulate` recibe `0` en vez de `0.0`. ¿Qué número esperas que imprima?
 
-_(tu respuesta)_
+Imprime 151. El valor inicial 0 hace que el acumulador sea int y cada suma
+decimal se convierte a entero, perdiendo la parte decimal en cada paso.
 
 **La formulación completa, tal como la resuelvo yo:**
 
-_(anota aquí cada llamada, lo que imprimió la lista y la suma con 0)_
+Se usaron accumulate, max_element, count y find con los rangos begin() y
+end(). La lista imprimio suma 153, maxima 25.5 y 2 dias en 23.0. La suma
+con 0 como valor inicial imprimio 151.
 
 ## Durante los ConcepTests
 
@@ -68,7 +78,9 @@ Escribe la función `esDiaSedentario` y resuelve cada `TODO` del `main` con `std
 
 Antes de dar el ejercicio por terminado, responde: ¿qué error da el compilador si la lambda de la meta no escribe `[meta]`? ¿Por qué el ejercicio ordena una copia y no el vector `pasos`?
 
-_(tu respuesta)_
+El compilador indica que meta no fue capturada por la lambda. Se ordena una
+copia para conservar pasos en su orden original y poder imprimirlo al
+final.
 
 ## Ejercicio 3: las ventas de la tienda
 
@@ -78,11 +90,14 @@ Responde las cuatro preguntas del `main` sobre un `std::vector<Venta>` con algor
 
 Antes de dar el ejercicio por terminado, responde: si `ventas` fuera una `std::list<Venta>`, ¿cuál de tus llamadas deja de compilar? ¿Con qué la reemplazarías?
 
-_(tu respuesta)_
+std::sort deja de compilar porque necesita iteradores de acceso aleatorio,
+y los de list no lo son. Se reemplaza por ventas.sort con la misma lambda
+de comparacion.
 
 Responde también: ¿qué imprime "Total recaudado" si el valor inicial de tu suma es `0` en vez de `0.0`? Pruébalo.
 
-_(tu respuesta)_
+Imprime 146, porque accumulate mantiene el acumulador como int y trunca
+cada total decimal antes de la siguiente suma.
 
 ## Compilar y ejecutar
 
@@ -103,4 +118,7 @@ Los algoritmos `std::accumulate` (de `<numeric>`, con y sin operación propia), 
 
 La `Bodega` de la sesión pasada devuelve `false` cuando no puede retirar, y `*std::max_element(v.begin(), v.end())` con un vector vacío lee una posición que no existe. ¿Cómo se entera hoy quien llama a esas funciones de que algo salió mal? ¿Qué pasa si no revisa el valor devuelto?
 
-_(tu respuesta)_
+Quien llama debe revisar el false o comparar el iterador con end() antes de
+usarlo. Si no lo revisa, puede continuar con un resultado incorrecto o
+desreferenciar una posicion invalida, que produce comportamiento
+indefinido.
