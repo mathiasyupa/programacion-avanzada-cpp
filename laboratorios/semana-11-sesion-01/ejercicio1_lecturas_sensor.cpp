@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 // Lecturas por hora del sensor de temperatura del laboratorio, de la hora 0
@@ -6,13 +7,13 @@
 // archivo antes de cambiar nada.
 
 double lecturaEn(std::vector<double> lecturas, int hora) {
-    // TODO 1: lee la lectura con lecturas.at(hora) en vez de lecturas[hora].
-    return lecturas[hora];
+    return lecturas.at(hora);
 }
 
 double promedioEntre(std::vector<double> lecturas, int desde, int hasta) {
-    // TODO 3: si desde es mayor que hasta, lanza std::invalid_argument con
-    // el mensaje "rango invertido". Incluye <stdexcept> arriba.
+    if (desde > hasta) {
+        throw std::invalid_argument("rango invertido");
+    }
     double suma = 0.0;
     for (int hora = desde; hora <= hasta; hora++) {
         suma = suma + lecturaEn(lecturas, hora);
@@ -25,19 +26,28 @@ int main() {
 
     int consultas[4] = {2, 5, 9, 1};
     for (int i = 0; i < 4; i++) {
-        // TODO 2: atrapa la excepcion que lanza lecturaEn, para que una hora
-        // sin lectura no detenga las consultas siguientes. En ese caso
-        // imprime "Hora N: sin lectura".
-        std::cout << "Hora " << consultas[i] << ": " << lecturaEn(lecturas, consultas[i]) << std::endl;
+        try {
+            double lectura = lecturaEn(lecturas, consultas[i]);
+            std::cout << "Hora " << consultas[i] << ": " << lectura << std::endl;
+        } catch (const std::out_of_range&) {
+            std::cout << "Hora " << consultas[i] << ": sin lectura" << std::endl;
+        }
     }
 
     int desdes[3] = {1, 4, 3};
     int hastas[3] = {3, 2, 8};
     for (int i = 0; i < 3; i++) {
-        // TODO 4: un try con dos catch. Para std::invalid_argument imprime
-        // "Promedio de D a H: error, " y el mensaje de la excepcion; para
-        // std::out_of_range, "Promedio de D a H: error, faltan lecturas".
-        std::cout << "Promedio de " << desdes[i] << " a " << hastas[i] << ": " << promedioEntre(lecturas, desdes[i], hastas[i]) << std::endl;
+        try {
+            double promedio = promedioEntre(lecturas, desdes[i], hastas[i]);
+            std::cout << "Promedio de " << desdes[i] << " a " << hastas[i]
+                      << ": " << promedio << std::endl;
+        } catch (const std::invalid_argument& e) {
+            std::cout << "Promedio de " << desdes[i] << " a " << hastas[i]
+                      << ": error, " << e.what() << std::endl;
+        } catch (const std::out_of_range&) {
+            std::cout << "Promedio de " << desdes[i] << " a " << hastas[i]
+                      << ": error, faltan lecturas" << std::endl;
+        }
     }
 
     std::cout << "Fin del reporte" << std::endl;

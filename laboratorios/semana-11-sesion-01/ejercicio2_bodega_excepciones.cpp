@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <stdexcept>
 
 // Salida esperada:
 // Stock: 120=2 210=5 305=10
@@ -29,27 +30,23 @@ class Bodega {
         // - codigo que no existe: std::out_of_range, "codigo desconocido";
         // - stock menor que cantidad: std::runtime_error, "stock insuficiente".
         // Ningun caso rechazado puede modificar el stock.
-        bool retirar(int codigo, int cantidad) {
+        void retirar(int codigo, int cantidad) {
             if (cantidad <= 0) {
-                return false;
+                throw std::invalid_argument("cantidad no positiva");
             }
             if (stock.count(codigo) == 0) {
-                return false;
+                throw std::out_of_range("codigo desconocido");
             }
             if (stock[codigo] < cantidad) {
-                return false;
+                throw std::runtime_error("stock insuficiente");
             }
             stock[codigo] = stock[codigo] - cantidad;
-            return true;
         }
 
         // TODO 2: lee el stock con stock.at(codigo), sin revisar antes con
         // count: si el codigo no existe, que la excepcion salga de aqui.
         int stockDe(int codigo) {
-            if (stock.count(codigo) == 0) {
-                return -1;
-            }
-            return stock[codigo];
+            return stock.at(codigo);
         }
 
         void imprimirStock() {
@@ -71,22 +68,33 @@ int main() {
     int codigos[5] = {120, 305, 999, 120, 210};
     int cantidades[5] = {1, 0, 1, 5, 5};
     for (int i = 0; i < 5; i++) {
-        // TODO 3: con try/catch, imprime "despachado" si retirar no lanza
-        // nada, o "rechazado, " y el mensaje de la excepcion si lanza.
         std::cout << "Pedido de " << cantidades[i] << " x " << codigos[i] << ": ";
-        if (bodega.retirar(codigos[i], cantidades[i])) {
+        try {
+            bodega.retirar(codigos[i], cantidades[i]);
             std::cout << "despachado" << std::endl;
-        } else {
-            std::cout << "rechazado" << std::endl;
+        } catch (const std::invalid_argument& e) {
+            std::cout << "rechazado, " << e.what() << std::endl;
+        } catch (const std::out_of_range& e) {
+            std::cout << "rechazado, " << e.what() << std::endl;
+        } catch (const std::runtime_error& e) {
+            std::cout << "rechazado, " << e.what() << std::endl;
         }
     }
 
     bodega.imprimirStock();
 
-    // TODO 4: imprime el stock de 305 y el de 999. Si stockDe lanza
-    // std::out_of_range, imprime "no registrado" en vez del numero.
-    std::cout << "Stock de 305: " << bodega.stockDe(305) << std::endl;
-    std::cout << "Stock de 999: " << bodega.stockDe(999) << std::endl;
+    try {
+        std::cout << "Stock de 305: " << bodega.stockDe(305) << std::endl;
+    } catch (const std::out_of_range&) {
+        std::cout << "Stock de 305: no registrado" << std::endl;
+    }
+
+    try {
+        int stock = bodega.stockDe(999);
+        std::cout << "Stock de 999: " << stock << std::endl;
+    } catch (const std::out_of_range&) {
+        std::cout << "Stock de 999: no registrado" << std::endl;
+    }
 
     return 0;
 }

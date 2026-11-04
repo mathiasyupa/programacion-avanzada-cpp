@@ -12,11 +12,16 @@ Agregar manejo robusto de errores con try, catch y throw a un programa que origi
 
 Según el artículo, ¿qué problema resuelven las excepciones frente a devolver un código de error? ¿Qué le cuesta al programador usarlas, según el autor?
 
-_(tu respuesta)_
+Las excepciones permiten informar un error sin mezclarlo con el valor
+normal de retorno y lo propagan hasta un lugar que pueda manejarlo. Exigen
+decidir que errores se lanzan y donde se atrapan, por lo que el flujo del
+programa es menos directo de seguir.
 
 La `Bodega` de la Semana 10 devuelve `false` cuando no puede retirar, y `*std::max_element(v.begin(), v.end())` con un vector vacío lee una posición que no existe. ¿Cómo se entera quien llama de que algo salió mal? ¿Qué pasa si no revisa el valor devuelto?
 
-_(tu respuesta)_
+Quien llama debe revisar el false o comprobar si el iterador es end(). Si
+no lo hace, puede continuar como si la operacion hubiera funcionado o leer
+una posicion invalida, con comportamiento indefinido.
 
 ## Ejercicio 1: el reporte del sensor
 
@@ -24,19 +29,37 @@ Archivo: [`ejercicio1_lecturas_sensor.cpp`](./ejercicio1_lecturas_sensor.cpp). S
 
 **Respuesta 1 (antes del TODO 1):** la consulta de la hora 9 y el promedio de 3 a 8 piden lecturas que no existen. ¿El programa avisó? ¿Qué números imprimió en esas dos líneas?
 
-_(tu respuesta)_
+No habia una validacion propia. Acceder con [] fuera del vector es
+comportamiento indefinido: en esta computadora el programa se detuvo con
+una comprobacion interna al consultar la hora 9, asi que no llego a
+imprimir un numero para esa hora ni para el promedio.
 
 **Respuesta 2 (TODO 1):** con `lecturas.at(hora)` en vez de `lecturas[hora]`, ¿qué esperas que pase al llegar a la hora 9? ¿Se imprime "Fin del reporte"?
 
-_(tu respuesta)_
+at() lanza std::out_of_range al llegar a la hora 9. Sin un catch, el
+programa se detiene y no imprime "Fin del reporte".
 
 **Respuesta 3 (TODO 2 y 4):** la excepción de la hora 9 se lanza dentro de `lecturaEn`. En el promedio de 3 a 8, `lecturaEn` la lanza dentro de `promedioEntre`, que fue llamada desde `main`. ¿Dónde tiene que estar el `catch` para atraparla, y qué pasa con el resto del cuerpo de `promedioEntre`?
 
-_(tu respuesta)_
+El catch debe rodear la llamada que puede llegar a lecturaEn, en main para
+este programa. Al lanzarse la excepcion, se abandona el resto del cuerpo de
+promedioEntre y la excepcion sube hasta encontrar ese catch.
 
 **La versión completa, tal como la resuelvo yo:**
 
-_(anota aquí dónde quedó cada throw, cada try y cada catch, y la salida final)_
+lecturaEn usa at(), promedioEntre lanza invalid_argument si el rango esta
+invertido, y main tiene try/catch para consultas y promedios. La salida es:
+
+```
+Hora 2: 21.5
+Hora 5: 20
+Hora 9: sin lectura
+Hora 1: 19
+Promedio de 1 a 3: 21.1667
+Promedio de 4 a 2: error, rango invertido
+Promedio de 3 a 8: error, faltan lecturas
+Fin del reporte
+```
 
 ## Durante los ConcepTests
 
@@ -68,11 +91,16 @@ Archivo: [`ejercicio2_bodega_excepciones.cpp`](./ejercicio2_bodega_excepciones.c
 
 Antes de dar el ejercicio por terminado, responde: ¿en qué orden quedaron las tres verificaciones de `retirar` y la resta del stock? ¿Qué le pasaría al stock de un pedido rechazado si la resta estuviera antes de la última verificación?
 
-_(tu respuesta)_
+Primero se valida la cantidad, despues que el codigo exista, luego que
+alcance el stock y al final se resta. Si la resta fuera antes de comprobar
+el stock, un pedido insuficiente podria dejar una cantidad negativa o
+alterar el inventario aun siendo rechazado.
 
 Responde también: en el `TODO 3`, ¿usaste un `catch` o tres? Si pones un `catch (const std::exception& e)` antes de un `catch (const std::out_of_range& e)`, ¿qué te dice el compilador, y por qué?
 
-_(tu respuesta)_
+Se usaron tres catch, uno por cada tipo. El compilador avisa que
+out_of_range ya seria atrapada por el catch de exception, porque exception
+es su clase base; los catch especificos deben ir primero.
 
 ## Ejercicio 3: el lote del horno
 
@@ -82,11 +110,18 @@ El horno corre todos los pasos del lote sin validar nada. El comentario del arch
 
 Antes de dar el ejercicio por terminado, responde: ¿qué tipo pusiste en el `catch` del loop de `ejecutarLote`? ¿Qué imprime el programa si lo cambias por `std::exception`? Pruébalo.
 
-_(tu respuesta)_
+El loop atrapa std::invalid_argument, para rechazar solo temperaturas
+programadas invalidas. Si atrapa std::exception, tambien atrapa el error
+grave del sensor: imprime que el paso 5 fue rechazado, ejecuta el paso 6,
+apaga la ventilacion y termina con temperatura programada 150, sin
+imprimir "Lote detenido".
 
 Responde también: ningún `catch` apaga la ventilación. ¿Por qué "Ventilacion apagada" se imprime antes que "Lote detenido"? ¿Qué pasa con esa línea si borras el `try` de `main`? Pruébalo.
 
-_(tu respuesta)_
+Ventilacion es un objeto local de ejecutarLote; al salir por la excepcion
+se ejecuta su destructor antes de que main reciba el error. Si se borra el
+try de main, la excepcion queda sin atrapar, se llama terminate y no se
+imprime "Ventilacion apagada" ni la temperatura final.
 
 ## Compilar y ejecutar
 
@@ -107,4 +142,6 @@ Repite el mismo patrón con `ejercicio2_bodega_excepciones.cpp` y `ejercicio3_ho
 
 Una función `buscarTemperatura(registro, hora)` no encuentra lectura para una hora. ¿Lanzarías una excepción? ¿Devolverías -1? ¿Y si la cámara de frío registra temperaturas bajo cero?
 
-_(tu respuesta)_
+Para una busqueda normal sin resultado usaria optional, no una excepcion.
+No devolveria -1 porque una temperatura negativa puede ser una lectura
+valida en una camara de frio.
