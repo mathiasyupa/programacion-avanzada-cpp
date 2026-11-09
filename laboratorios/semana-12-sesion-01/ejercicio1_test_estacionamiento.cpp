@@ -18,12 +18,36 @@ TEST(Estacionamiento, PrimeraPlacaRecibePuestoCero) {
     EXPECT_EQ(*puesto, 0);
 }
 
-// TODO 1: prueba LlenoDevuelveVacio. Con 3 puestos, asigna tres placas
-// distintas; la cuarta tiene que recibir un optional vacio
-// (EXPECT_FALSE sobre has_value()).
+TEST(Estacionamiento, LlenoDevuelveVacio) {
+    Estacionamiento estacionamiento(3);
 
-// TODO 2: prueba PlacaRepetidaLanza. Asigna la placa 7788 y verifica que
-// asignarla otra vez lanza std::invalid_argument (EXPECT_THROW).
+    estacionamiento.asignarPuesto(1001);
+    estacionamiento.asignarPuesto(1002);
+    estacionamiento.asignarPuesto(1003);
 
-// TODO 3: prueba PuestoLiberadoSeReusa. Llena los 3 puestos, libera la
-// placa del puesto 1 y verifica que la siguiente placa recibe el puesto 1.
+    std::optional<int> puesto = estacionamiento.asignarPuesto(1004);
+
+    EXPECT_FALSE(puesto.has_value());
+}
+
+TEST(Estacionamiento, PlacaRepetidaLanza) {
+    Estacionamiento estacionamiento(3);
+
+    estacionamiento.asignarPuesto(7788);
+
+    EXPECT_THROW(estacionamiento.asignarPuesto(7788), std::invalid_argument);
+}
+
+TEST(Estacionamiento, PuestoLiberadoSeReusa) {
+    Estacionamiento estacionamiento(3);
+
+    estacionamiento.asignarPuesto(1001);
+    estacionamiento.asignarPuesto(1002);
+    estacionamiento.asignarPuesto(1003);
+    estacionamiento.liberar(1002);
+
+    std::optional<int> nueva = estacionamiento.asignarPuesto(1004);
+
+    ASSERT_TRUE(nueva.has_value());
+    EXPECT_EQ(*nueva, 1);
+}
