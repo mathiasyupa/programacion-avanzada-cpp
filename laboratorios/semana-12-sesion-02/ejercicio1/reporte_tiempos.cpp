@@ -62,6 +62,9 @@ class RegistroDelDia {
 
 int minutosDe(RegistroDelDia* registro, int placa) {
     Estadia* estadia = registro->ultimaDe(placa);
+    if (estadia == nullptr) {
+        return -1;
+    }
     return estadia->getSalida() - estadia->getEntrada();
 }
 
@@ -74,7 +77,11 @@ int main() {
     int placas[4] = {4521, 7788, 5555, 3011};
     for (int i = 0; i < 4; i++) {
         int minutos = minutosDe(&registro, placas[i]);
-        std::cout << "Placa " << placas[i] << ": " << minutos << " minutos" << std::endl;
+        if (minutos == -1) {
+            std::cout << "Placa " << placas[i] << ": sin registro hoy" << std::endl;
+        } else {
+            std::cout << "Placa " << placas[i] << ": " << minutos << " minutos" << std::endl;
+        }
     }
 
     return 0;

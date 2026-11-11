@@ -40,19 +40,19 @@ Carpeta: [`ejercicio1/`](./ejercicio1/). Tiene el estacionamiento (`estacionamie
 
 **Respuesta 1 (después del TODO 3):** con todo compilado, si corres `cmake --build build` otra vez sin cambiar nada, ¿qué se recompila? ¿Y si cambias solo `main.cpp`?
 
-_(tu respuesta)_
+Si no cambia nada, CMake revisa las dependencias y no recompila ningun archivo. Si cambia solo `main.cpp`, recompila ese archivo y vuelve a enlazar solamente el ejecutable `estacionamiento`.
 
 **Respuesta 2 (después del TODO 3):** si cambias `estacionamiento.h`, ¿qué ejecutables se recompilan? ¿Cómo lo sabe CMake, si ningún `CMakeLists.txt` menciona ese archivo?
 
-_(tu respuesta)_
+Se recompilan `estacionamiento` y `pruebas`, porque ambos incluyen `estacionamiento.h`; `reporte_tiempos` no. CMake usa las dependencias que el compilador genera al compilar los archivos, aunque el encabezado no aparezca escrito en `CMakeLists.txt`.
 
 **Respuesta 3 (después del TODO 4):** `reporte_tiempos` termina con `Segmentation fault`. Antes de abrirlo con gdb: ¿en qué función crees que se detiene, y qué valor tiene el puntero que se desreferencia?
 
-_(tu respuesta)_
+Se detiene en `Estadia::getSalida`. El objeto que intenta usar es nulo: gdb muestra `this=0x0`, porque `ultimaDe(5555)` devolvio `nullptr`.
 
 **La versión completa, tal como la resuelvo yo:**
 
-_(anota aquí el CMakeLists.txt final, los comandos de gdb que usé, lo que mostró `bt`, y la corrección de reporte_tiempos.cpp)_
+Se configuraron los tres ejecutables, las pruebas con GoogleTest y `ctest`. Use `gdb -q reporte_tiempos`, despues `run` y `bt`. El backtrace mostro `Estadia::getSalida (this=0x0)`, llamado desde `minutosDe` para la placa 5555. La correccion fue comprobar si `ultimaDe` devuelve `nullptr`; en ese caso `minutosDe` retorna -1 y `main` imprime `sin registro hoy`.
 
 ## Durante los ConcepTests
 
@@ -85,20 +85,20 @@ Carpeta: [`ejercicio2/`](./ejercicio2/). Solo o en pareja.
 1. Completa los `TODO` 1 a 3 de `CMakeLists.txt`.
 2. Compila en `build/`, corre `./build/promedios` y `ctest --test-dir build --output-on-failure`. ¿Coincide la salida con la esperada? ¿Pasan las pruebas?
 
-_(tu respuesta)_
+Sin sanitizers, la salida visible coincide con la esperada y las dos pruebas iniciales pasan. Eso no demuestra que la funcion este bien: las dos ultimas ventanas leen fuera del vector, pero `main` solo imprime los primeros cuatro resultados.
 
 3. Configura una segunda carpeta con sanitizers (el comando está en el encabezado de `CMakeLists.txt`), compila y corre `./build-asan/promedios`. ¿Qué tipo de error reporta AddressSanitizer, en qué archivo y en qué línea? ¿Por qué el programa sin sanitizers no terminó con un error, y por qué su salida era la correcta?
 
-_(tu respuesta)_
+AddressSanitizer reporta un `heap-buffer-overflow` al leer `lecturas[inicio + j]` en `lecturas.h`. Sin sanitizer ese acceso fuera de rango tiene comportamiento indefinido y puede no detener el programa. Los primeros cuatro promedios se calculan con posiciones validas, que son precisamente los que imprime `main`.
 
 4. Escribe la prueba del `TODO 4` de `test_lecturas.cpp` y verifica que falla en `build/` antes de corregir nada.
 5. Corrige `lecturas.h`. Las tres pruebas tienen que pasar en `build/` y en `build-asan/`. ¿Qué cambiaste?
 
-_(tu respuesta)_
+Cambie la condicion del ciclo externo a `inicio + ventana <= cantidad`. Asi solo se crean ventanas completas y, con seis lecturas y ventana tres, se generan exactamente cuatro promedios.
 
 Responde: ¿por qué dos carpetas de compilación (`build/` y `build-asan/`) y no una sola que cambia de opción?
 
-_(tu respuesta)_
+Cada carpeta guarda una configuracion y ejecutables distintos. Asi se puede conservar una compilacion normal y otra con sanitizers sin mezclar opciones ni tener que reconfigurar una para usar la otra.
 
 ## Ejercicio 3: la cola de impresión de la biblioteca
 
@@ -116,18 +116,22 @@ Completa la tabla con tu diagnóstico de cada error:
 
 | Error | Síntoma | Herramienta que lo localizó | Causa (archivo, línea) | Corrección |
 |---|---|---|---|---|
-| 1 | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
-| 2 | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
+| 1 | 25 paginas daba 2 minutos, no 3 | Prueba unitaria | `cola_impresion.h`, `minutosDeImpresion` usaba division entera | Usar `(paginas + 9) / 10` para redondear hacia arriba |
+| 2 | Corrupcion de memoria al dividir trabajos grandes | gdb y sanitizer | `cola_impresion.h`, `push_back` invalidaba el iterador del ciclo | Recorrer con indice y no guardar un iterador mientras se agrega al vector |
 
 Usa gdb al menos una vez, en cualquiera de los dos errores. Pega aquí los comandos que escribiste y lo que respondió gdb:
 
 ```
-(tu sesión de gdb)
+gdb -q cola
+(gdb) run
+Program received signal SIGABRT
+(gdb) bt
+... ColaDeImpresion::dividirGrandes ... cola_impresion.h
 ```
 
 Responde: uno de los dos errores no lo reporta ningún sanitizer. ¿Cuál, y por qué? ¿Qué lo detectó?
 
-_(tu respuesta)_
+El redondeo incorrecto de minutos no lo reporta ningun sanitizer, porque no usa memoria invalida ni produce comportamiento indefinido: es un error de logica. Lo detecto la prueba unitaria de 25 paginas.
 
 ## Qué construcciones nuevas usa este laboratorio
 
