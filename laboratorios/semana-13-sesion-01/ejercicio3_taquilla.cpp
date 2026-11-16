@@ -39,7 +39,53 @@
 // Asientos vendidos: 20000
 // Pares a medias: 0
 
-// TODO: escribe aqui la clase Taquilla.
+class Taquilla {
+    private:
+        std::vector<int> duenos;
+        int cantidadVendidos;
+        std::mutex candado;
+    public:
+        Taquilla(int asientos) {
+            duenos = std::vector<int>(asientos, 0);
+            cantidadVendidos = 0;
+        }
+
+        bool reservar(int asiento, int comprador) {
+            std::lock_guard<std::mutex> guardia(candado);
+            if (asiento < 0 || asiento >= static_cast<int>(duenos.size()) || duenos[asiento] != 0) {
+                return false;
+            }
+            duenos[asiento] = comprador;
+            cantidadVendidos = cantidadVendidos + 1;
+            return true;
+        }
+
+        bool reservarPar(int a, int b, int comprador) {
+            std::lock_guard<std::mutex> guardia(candado);
+            if (a < 0 || b < 0 || a >= static_cast<int>(duenos.size()) ||
+                b >= static_cast<int>(duenos.size()) || a == b ||
+                duenos[a] != 0 || duenos[b] != 0) {
+                return false;
+            }
+            duenos[a] = comprador;
+            duenos[b] = comprador;
+            cantidadVendidos = cantidadVendidos + 2;
+            return true;
+        }
+
+        int duenoDe(int asiento) {
+            std::lock_guard<std::mutex> guardia(candado);
+            if (asiento < 0 || asiento >= static_cast<int>(duenos.size())) {
+                return 0;
+            }
+            return duenos[asiento];
+        }
+
+        int vendidos() {
+            std::lock_guard<std::mutex> guardia(candado);
+            return cantidadVendidos;
+        }
+};
 
 void vendedor(Taquilla* taquilla, int comprador, int* logradas) {
     for (int asiento = 0; asiento < 20000; asiento++) {
